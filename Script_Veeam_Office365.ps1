@@ -76,7 +76,6 @@ $nextIsJob=$false
 $oneJob=$false
 $jobToCheck=""
 $WrongParam=$false
-$DisabledJobs=$true
 $global:OutMessageTemp=""
 $global:OutMessage=""
 $global:Exitcode=""
