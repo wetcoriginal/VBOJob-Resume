@@ -1,4 +1,4 @@
-# Script retravaillé par Jordy LACHEREZ afin de l'adapter à VBO365
+# Script retravaillé par @wetcoriginal afin de l'adapter à VBO365
 
 function CheckOneJob {
 $JobCheck=Get-VBOJob -Name $args[0]
