@@ -2,8 +2,8 @@
 
 function CheckOneJob {
 $JobCheck=Get-VBOJob -Name $args[0]
-$CreationJobTime=Get-VBOJob -name $args[0] | Get-VBOJobSession -Last | Foreach-Object {$_.CreationTime}
-$DisabledJobs=Get-VBOJob -name $args[0] | Foreach-Object {$_.IsEnabled}
+$CreationJobTime=$JobCheck | Get-VBOJobSession -Last | Foreach-Object {$_.CreationTime}
+$DisabledJobs=$JobCheck | Foreach-Object {$_.IsEnabled}
 if($global:OutMessageTemp -ne ""){$global:OutMessageTemp+="`r`n"}
 if($JobCheck.isEnabled -eq $false){ # Disabled job -> WARNING
 if($DisabledJobs -ne $true){
