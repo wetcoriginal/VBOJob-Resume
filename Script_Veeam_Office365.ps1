@@ -1,26 +1,35 @@
-# Script retravaillé par @wetcoriginal afin de l'adapter à VBO365
+# Script retravaillé par Jordy LACHEREZ afin de l'adapter à VBO365
 
 function CheckOneJob {
 $JobCheck=Get-VBOJob -Name $args[0]
+$lastStatus=$JobCheck | Get-VBOJobSession -Last | Foreach-Object {$_.Status}
 $CreationJobTime=$JobCheck | Get-VBOJobSession -Last | Foreach-Object {$_.CreationTime}
 $DisabledJobs=$JobCheck | Foreach-Object {$_.IsEnabled}
+$Avant=$JobCheck | Get-VBOJobSession -Last | Foreach-Object {$_.CreationTime}
+$Apres=Get-Date
+$TempsEcoulee=$Apres-$Avant
+$LimitTemps="23:59:00.0000000" #Valeur -> Si le job est en Running depuis + de 24h -> Warning 
+
 if($global:OutMessageTemp -ne ""){$global:OutMessageTemp+="`r`n"}
-if($JobCheck.isEnabled -eq $false){ # Disabled job -> WARNING
+if($JobCheck.isEnabled -eq $false){
 if($DisabledJobs -ne $true){
 $global:OutMessageTemp+="WARNING - Le job '"+$JobCheck.Name+"' est desactive "
-$global:WarningDisabledCount++
-if($global:ExitCode -lt 2){$global:ExitCode=1} # if no previous Critical status then switch to WARNING
+$global:WarningDisabledCount++ #exo
+if($global:ExitCode -lt 2){$global:ExitCode=1}
 }
 }
-else # The job is enabled
+else
 {
-$lastStatus=$JobCheck | Get-VBOJobSession -Last | Foreach-Object {$_.Status}
-if($lastStatus -eq "Running"){
+if($lastStatus -eq "Running" -and $TempsEcoulee -gt $LimitTemps){ # Si le job est en Running depuis + de 24h -> Warning 
+$global:OutMessageTemp+="WARNING: Le job "+$JobCheck.Name+" est en cours depuis $TempsEcoulee minutes"
+$global:WarningCount++
+}
+elseif($lastStatus -eq "Running"){
 $global:OutMessageTemp+="OK - Le job "+$JobCheck.Name+" est en cours de sauvegarde"
 $global:OkCount++
-} 
+}
 else {
-if($lastStatus -ne "Success"){ # Failed or None->never run before (probaly a newly created job)
+if($lastStatus -ne "Success"){
 if($lastStatus -eq "none"){
 $global:OutMessageTemp+="WARNING: Le job "+$JobCheck.Name+" n a jamais ete execute"
 $global:WarningCount++
@@ -33,7 +42,7 @@ if($global:ExitCode -ne 2) {$global:ExitCode=1}
 }
 else {
 $global:OutMessageTemp+="CRITICAL - Le job "+$JobCheck.Name+" a echoue"
-$global:CriticalCount++ #exo
+$global:CriticalCount++
 $global:ExitCode=2
 }
 }
@@ -68,10 +77,6 @@ $global:OkCount++
 }
 }
 
-######################################################
-# Main loop (well, not exactly a loop) #
-######################################################
-
 $nextIsJob=$false
 $oneJob=$false
 $jobToCheck=""
@@ -90,7 +95,7 @@ $TotalCount=0
 if( $args.Length -ge 1)
 {
 foreach($value in $args) {
-if($nextIsJob -eq $true) { # parameter coming after -j switch
+if($nextIsJob -eq $true) {
 if(($value.Length -eq 2) -and ($value.substring(0,1) -eq '-')){
 $WrongParam=$true
 }
@@ -98,10 +103,10 @@ $nextIsJob=$false
 $jobToCheck=$value
 $onejob=$true
 }
-elseif($value -eq '-j') { # -j -> check only one job and its name goes in the following parameter (default is to check all backup jobs)
+elseif($value -eq '-j') {
 $nextIsJob=$true
 }
-elseif($value -eq '-d') { # -d -> Do not warn for disabled jobs (default is to warn)
+elseif($value -eq '-d') {
 $DisabledJobs=$false
 }
 else {$WrongParam=$true}
