@@ -1,4 +1,4 @@
-# Script retravaillé par Jordy LACHEREZ afin de l'adapter à VBO365
+#Edited by @wetcoriginal for Veeam Backup Office 365#
 
 function CheckOneJob {
 $JobCheck=Get-VBOJob -Name $args[0]
