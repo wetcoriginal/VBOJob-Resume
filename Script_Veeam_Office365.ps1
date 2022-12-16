@@ -49,7 +49,7 @@ $global:ExitCode=2
 else
 {
  
-if (($JobCheck.IsBackup -eq $true) -and ($DiffTime.TotalDays -gt 1))
+if (($JobCheck.IsBackup -eq $true) -and ($DiffTime.Days -gt 1))
 {
 $global:ExitCode=2
 $global:OutMessageTemp+="CRITICAL - Le job "+$JobCheck.Name+" n a pas ete execute lors de la derniere journee"
@@ -58,7 +58,7 @@ $global:CriticalCount++
  
 else
 {
-if(($JobCheck.IsReplica -eq $true) -and ($DiffTime.TotalHours -gt 2) )
+if(($JobCheck.IsReplica -eq $true) -and ($DiffTime.Hours -gt 2) )
 {
 $global:ExitCode=2
 $global:OutMessageTemp+="CRITICAL - La replication "+$JobCheck.Name+" n a pas ete execute lors de la derniere journee"
